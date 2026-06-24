@@ -1,5 +1,6 @@
 import HabitList from "@/components/HabitList";
 import WeightChart from "@/components/WeightChart";
+import AiCoach from "@/components/AiCoach";
 
 export default function Home() {
   return (
@@ -25,7 +26,7 @@ export default function Home() {
       {/* AIコーチセクション */}
       <section>
         <h2 className="text-xl font-semibold mb-4 border-b border-gray-200 pb-2">AIコーチに相談</h2>
-        <p className="text-sm text-gray-400">（ステップ4で実装予定）</p>
+        <AiCoach />
       </section>
     </div>
   );
