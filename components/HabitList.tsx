@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, startTransition } from "react";
 import {
   getHabits,
   saveHabits,
@@ -21,14 +21,12 @@ export default function HabitList() {
   const [logs, setLogs] = useState<HabitLog[]>([]);
   const [newName, setNewName] = useState("");
 
-  const load = useCallback(() => {
-    setHabits(getHabits());
-    setLogs(getLogs());
-  }, []);
-
   useEffect(() => {
-    load();
-  }, [load]);
+    startTransition(() => {
+      setHabits(getHabits());
+      setLogs(getLogs());
+    });
+  }, []);
 
   function addHabit(e: React.FormEvent) {
     e.preventDefault();

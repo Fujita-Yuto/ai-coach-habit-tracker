@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
 import { getLogs } from "@/lib/storage";
 
 type Cell = {
@@ -94,8 +94,10 @@ export default function HabitHeatmap() {
       if (log.done) countMap[log.date] = (countMap[log.date] ?? 0) + 1;
     }
     const { weeks, monthMarkers } = buildGrid(countMap);
-    setWeeks(weeks);
-    setMonthMarkers(monthMarkers);
+    startTransition(() => {
+      setWeeks(weeks);
+      setMonthMarkers(monthMarkers);
+    });
   }, []);
 
   if (weeks.length === 0) return null;

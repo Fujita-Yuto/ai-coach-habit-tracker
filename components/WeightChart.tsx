@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
 import {
   LineChart,
   Line,
@@ -22,7 +22,9 @@ export default function WeightChart() {
   const [kg, setKg] = useState("");
 
   useEffect(() => {
-    setWeights(getWeights());
+    startTransition(() => {
+      setWeights(getWeights());
+    });
   }, []);
 
   function addWeight(e: React.FormEvent) {
