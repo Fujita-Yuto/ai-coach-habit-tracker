@@ -1,5 +1,7 @@
 # AIコーチ習慣トラッカー
 
+[![CI](https://github.com/Fujita-Yuto/ai-coach-habit-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/Fujita-Yuto/ai-coach-habit-tracker/actions/workflows/ci.yml)
+
 体重・運動・食事などの習慣を毎日記録し、AIコーチ（Gemini API）が日本語で励ましと具体的な改善提案を返すWebアプリ。
 
 **デモ：** https://ai-coach-habit-tracker.vercel.app/
@@ -56,6 +58,15 @@ npm run dev
 ```
 
 ブラウザで http://localhost:3000 を開く。
+
+## テスト
+
+```bash
+npm test          # 全テストを1回実行
+npm run test:watch  # ファイル変更を監視して自動再実行
+```
+
+`lib/storage.ts` のストリーク計算・7日達成率計算に対するユニットテストを網羅しています（境界ケース含む）。
 
 ---
 
