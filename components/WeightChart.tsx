@@ -1,4 +1,138 @@
-// ステップ3で実装
+"use client";
+
+import { useState, useEffect } from "react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { getWeights, saveWeights, type WeightEntry } from "@/lib/storage";
+
+function todayStr(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export default function WeightChart() {
-  return <div />;
+  const [weights, setWeights] = useState<WeightEntry[]>([]);
+  const [date, setDate] = useState(todayStr());
+  const [kg, setKg] = useState("");
+
+  useEffect(() => {
+    setWeights(getWeights());
+  }, []);
+
+  function addWeight(e: React.FormEvent) {
+    e.preventDefault();
+    const weightKg = parseFloat(kg);
+    if (!date || isNaN(weightKg) || weightKg <= 0) return;
+
+    // 同日は上書き
+    const updated = [
+      ...weights.filter((w) => w.date !== date),
+      { date, weightKg },
+    ].sort((a, b) => a.date.localeCompare(b.date));
+
+    saveWeights(updated);
+    setWeights(updated);
+    setKg("");
+  }
+
+  function removeWeight(targetDate: string) {
+    const updated = weights.filter((w) => w.date !== targetDate);
+    saveWeights(updated);
+    setWeights(updated);
+  }
+
+  // 直近30件をグラフ用データに変換
+  const chartData = weights.slice(-30).map((w) => ({
+    date: w.date.slice(5), // "MM-DD" 表示
+    体重: w.weightKg,
+  }));
+
+  return (
+    <div className="space-y-4">
+      {/* 入力フォーム */}
+      <form onSubmit={addWeight} className="flex flex-wrap gap-2">
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
+        />
+        <input
+          type="number"
+          value={kg}
+          onChange={(e) => setKg(e.target.value)}
+          placeholder="体重 (kg)"
+          step="0.1"
+          min="0"
+          className="w-32 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
+        />
+        <button
+          type="submit"
+          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+        >
+          記録
+        </button>
+      </form>
+
+      {/* 折れ線グラフ */}
+      {chartData.length === 0 ? (
+        <p className="text-sm text-gray-400">体重を記録するとグラフが表示されます。</p>
+      ) : (
+        <div className="h-56 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+              <YAxis
+                domain={["auto", "auto"]}
+                tick={{ fontSize: 11 }}
+                tickFormatter={(v: number) => `${v}kg`}
+                width={52}
+              />
+              <Tooltip formatter={(v) => [`${v} kg`, "体重"]} />
+              <Line
+                type="monotone"
+                dataKey="体重"
+                stroke="#6366f1"
+                strokeWidth={2}
+                dot={{ r: 3 }}
+                activeDot={{ r: 5 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* 直近5件リスト */}
+      {weights.length > 0 && (
+        <ul className="space-y-1 text-sm text-gray-600">
+          {[...weights]
+            .reverse()
+            .slice(0, 5)
+            .map((w) => (
+              <li
+                key={w.date}
+                className="flex items-center justify-between border-b border-gray-100 py-1"
+              >
+                <span>{w.date}</span>
+                <span className="font-medium">{w.weightKg} kg</span>
+                <button
+                  onClick={() => removeWeight(w.date)}
+                  className="text-gray-300 transition-colors hover:text-red-400"
+                  aria-label={`${w.date}の記録を削除`}
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+        </ul>
+      )}
+    </div>
+  );
 }
