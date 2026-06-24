@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AIコーチ習慣トラッカー
 
-## Getting Started
+体重・運動・食事などの習慣を毎日記録し、AIコーチ（Gemini API）が日本語で励ましと具体的な改善提案を返すWebアプリ。
 
-First, run the development server:
+## なぜ作ったか
+
+RIZAPテクノロジーズが手がける chocoZAP アプリの「運動・健康状態の可視化」と、RIZAPの理念「人は変われる」「結果にコミット」に着想を得て、**データの可視化 × AI(LLM)による伴走**を1つのアプリで体現することを目的として開発しました。
+
+## 主な機能
+
+- **習慣の管理**：習慣（名前のみ）を追加・削除
+- **今日の達成チェック**：各習慣の達成可否をチェック
+- **進捗の可視化**：連続達成日数（ストリーク）・直近7日の達成率
+- **体重記録 ＋ グラフ**：日付つきで体重を記録し、折れ線グラフで推移を表示
+- **AIコーチに相談**：Gemini APIが励まし＋具体的な改善提案を日本語で返す
+
+## 使用技術
+
+| 区分 | 技術 |
+|------|------|
+| フレームワーク | Next.js 16 (App Router) + TypeScript |
+| スタイリング | Tailwind CSS |
+| グラフ | Recharts |
+| AIコーチ | Gemini API（`gemini-2.5-flash`） |
+| データ保存 | localStorage |
+| デプロイ | Vercel |
+
+## ローカル起動手順
 
 ```bash
+# 1. 依存パッケージをインストール
+npm install
+
+# 2. Gemini APIキーを設定
+#    プロジェクト直下に .env.local を作成し、以下を記入
+#    GEMINI_API_KEY=your_api_key_here
+#    （APIキーは https://aistudio.google.com/ から無料取得）
+
+# 3. 開発サーバーを起動
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+ブラウザで http://localhost:3000 を開く。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## デプロイ
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+[Vercel](https://vercel.com/) にリポジトリを連携し、環境変数 `GEMINI_API_KEY` を設定してデプロイ。
