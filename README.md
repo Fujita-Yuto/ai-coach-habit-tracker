@@ -2,7 +2,7 @@
 
 体重・運動・食事などの習慣を毎日記録し、AIコーチ（Gemini API）が日本語で励ましと具体的な改善提案を返すWebアプリ。
 
-**デモ：** <!-- Vercelデプロイ後にURLをここに貼る -->
+**デモ：** https://ai-coach-habit-tracker.vercel.app/
 
 ---
 
