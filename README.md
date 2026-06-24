@@ -1,5 +1,7 @@
 # AIコーチ習慣トラッカー
 
+**CaludeCodeを使って作成した**
+
 [![CI](https://github.com/Fujita-Yuto/ai-coach-habit-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/Fujita-Yuto/ai-coach-habit-tracker/actions/workflows/ci.yml)
 
 体重・運動・食事などの習慣を毎日記録し、AIコーチ（Gemini API）が日本語で励ましと具体的な改善提案を返すWebアプリ。
