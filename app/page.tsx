@@ -1,3 +1,5 @@
+import HabitList from "@/components/HabitList";
+
 export default function Home() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-10">
@@ -10,19 +12,19 @@ export default function Home() {
       {/* 習慣リストセクション */}
       <section>
         <h2 className="text-xl font-semibold mb-4 border-b border-gray-200 pb-2">習慣リスト</h2>
-        <p className="text-gray-400 text-sm">（ステップ2で実装予定）</p>
+        <HabitList />
       </section>
 
       {/* 体重セクション */}
       <section>
         <h2 className="text-xl font-semibold mb-4 border-b border-gray-200 pb-2">体重の記録</h2>
-        <p className="text-gray-400 text-sm">（ステップ3で実装予定）</p>
+        <p className="text-sm text-gray-400">（ステップ3で実装予定）</p>
       </section>
 
       {/* AIコーチセクション */}
       <section>
         <h2 className="text-xl font-semibold mb-4 border-b border-gray-200 pb-2">AIコーチに相談</h2>
-        <p className="text-gray-400 text-sm">（ステップ4で実装予定）</p>
+        <p className="text-sm text-gray-400">（ステップ4で実装予定）</p>
       </section>
     </div>
   );
