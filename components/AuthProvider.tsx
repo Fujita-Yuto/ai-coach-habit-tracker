@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, startTransition } from "react";
 import type { User } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase";
 
@@ -15,9 +15,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const sb = getSupabase();
 
+    // Supabase が設定されていない場合はゲストモード
+    if (!sb) {
+      startTransition(() => setLoading(false));
+      return;
+    }
+
     sb.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-      setLoading(false);
+      startTransition(() => {
+        setUser(data.user);
+        setLoading(false);
+      });
     });
 
     const {
