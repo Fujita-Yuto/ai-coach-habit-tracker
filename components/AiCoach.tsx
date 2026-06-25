@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { getHabits, getLogs, getWeights, calcWeeklyRate } from "@/lib/storage";
+import { dbGetHabits, dbGetLogs, dbGetWeights } from "@/lib/db";
+import { useAuth } from "./AuthProvider";
 import type { CoachResponse } from "@/app/api/coach/route";
 
 const CARDS: {
@@ -39,6 +41,7 @@ const CARDS: {
 ];
 
 export default function AiCoach() {
+  const { user } = useAuth();
   const [result, setResult] = useState<CoachResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -48,9 +51,14 @@ export default function AiCoach() {
     setResult(null);
     setError(null);
 
-    const habits = getHabits();
-    const logs = getLogs();
-    const weights = getWeights();
+    const [habits, logs, weights] = user
+      ? await Promise.all([
+          dbGetHabits(user.id),
+          dbGetLogs(user.id),
+          dbGetWeights(user.id),
+        ])
+      : [getHabits(), getLogs(), getWeights()];
+
     const weeklyCompletionRate = calcWeeklyRate(habits, logs);
 
     try {

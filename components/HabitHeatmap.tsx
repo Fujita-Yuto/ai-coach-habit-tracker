@@ -2,6 +2,8 @@
 
 import { useState, useEffect, startTransition } from "react";
 import { getLogs } from "@/lib/storage";
+import { dbGetLogs } from "@/lib/db";
+import { useAuth } from "./AuthProvider";
 
 type Cell = {
   dateStr: string;
@@ -15,12 +17,11 @@ const MONTH_LABELS = [
   "1月","2月","3月","4月","5月","6月",
   "7月","8月","9月","10月","11月","12月",
 ];
-// 日曜始まり: 月・水・金だけ表示（GitHub スタイル）
 const DOW_LABELS = ["", "月", "", "水", "", "金", ""];
 
-const CELL_PX = 12; // w-3
-const GAP_PX  = 2;  // gap-0.5
-const COL_W   = CELL_PX + GAP_PX; // 14px / week
+const CELL_PX = 12;
+const GAP_PX  = 2;
+const COL_W   = CELL_PX + GAP_PX;
 
 function toUtcDateStr(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -29,7 +30,6 @@ function toUtcDateStr(d: Date): string {
 function buildGrid(countMap: Record<string, number>) {
   const todayStr = toUtcDateStr(new Date());
 
-  // 今週の日曜（UTC）を基点に 52 週前の日曜から開始
   const now = new Date();
   const currentSunday = new Date(now);
   currentSunday.setUTCDate(now.getUTCDate() - now.getUTCDay());
@@ -44,7 +44,6 @@ function buildGrid(countMap: Record<string, number>) {
   const cursor = new Date(start);
 
   while (weeks.length < 53) {
-    // 月ラベル: 週の日曜の月が変わったタイミングで追加
     const m = cursor.getUTCMonth();
     if (m !== lastMonth) {
       monthMarkers.push({ col: weeks.length, label: MONTH_LABELS[m] });
@@ -63,7 +62,6 @@ function buildGrid(countMap: Record<string, number>) {
     }
     weeks.push(week);
 
-    // 次の日曜が今日より後ならグリッド完成
     if (toUtcDateStr(cursor) > todayStr) break;
   }
 
@@ -79,6 +77,7 @@ function cellBg(count: number, isFuture: boolean): string {
 }
 
 export default function HabitHeatmap() {
+  const { user } = useAuth();
   const [weeks, setWeeks] = useState<Cell[][]>([]);
   const [monthMarkers, setMonthMarkers] = useState<MonthMarker[]>([]);
   const [tooltip, setTooltip] = useState<{
@@ -88,17 +87,20 @@ export default function HabitHeatmap() {
   } | null>(null);
 
   useEffect(() => {
-    const logs = getLogs();
-    const countMap: Record<string, number> = {};
-    for (const log of logs) {
-      if (log.done) countMap[log.date] = (countMap[log.date] ?? 0) + 1;
+    async function load() {
+      const logs = user ? await dbGetLogs(user.id) : getLogs();
+      const countMap: Record<string, number> = {};
+      for (const log of logs) {
+        if (log.done) countMap[log.date] = (countMap[log.date] ?? 0) + 1;
+      }
+      const { weeks, monthMarkers } = buildGrid(countMap);
+      startTransition(() => {
+        setWeeks(weeks);
+        setMonthMarkers(monthMarkers);
+      });
     }
-    const { weeks, monthMarkers } = buildGrid(countMap);
-    startTransition(() => {
-      setWeeks(weeks);
-      setMonthMarkers(monthMarkers);
-    });
-  }, []);
+    load();
+  }, [user]);
 
   if (weeks.length === 0) return null;
 
@@ -106,20 +108,17 @@ export default function HabitHeatmap() {
     .flat()
     .reduce((s, c) => s + (c.isFuture ? 0 : c.count), 0);
 
-  const gridWidth = weeks.length * COL_W + 24; // 24px = day-label column
+  const gridWidth = weeks.length * COL_W + 24;
 
   return (
     <div className="space-y-3">
-      {/* サマリ */}
       <p className="text-sm text-gray-500">
         過去1年間の達成合計：
         <span className="font-semibold text-indigo-600">{totalDone} 件</span>
       </p>
 
-      {/* スクロール可能なグリッド */}
       <div className="overflow-x-auto pb-1">
         <div className="relative" style={{ width: `${gridWidth}px` }}>
-          {/* 月ラベル行 */}
           <div className="relative h-5 ml-6">
             {monthMarkers.map(({ col, label }) => (
               <span
@@ -132,9 +131,7 @@ export default function HabitHeatmap() {
             ))}
           </div>
 
-          {/* 曜日ラベル + セルグリッド */}
           <div className="flex gap-0.5">
-            {/* 曜日ラベル列 */}
             <div className="flex flex-col gap-0.5 w-6 shrink-0">
               {DOW_LABELS.map((label, i) => (
                 <div
@@ -146,7 +143,6 @@ export default function HabitHeatmap() {
               ))}
             </div>
 
-            {/* 週ごとの列 */}
             {weeks.map((week, wi) => (
               <div key={wi} className="flex flex-col gap-0.5">
                 {week.map((cell, di) => (
@@ -171,7 +167,6 @@ export default function HabitHeatmap() {
         </div>
       </div>
 
-      {/* ツールチップ（fixed でビューポート基準に配置）*/}
       {tooltip && (
         <div
           className="fixed z-50 pointer-events-none rounded bg-gray-900 px-2 py-1 text-xs text-white shadow-lg whitespace-nowrap"
@@ -185,7 +180,6 @@ export default function HabitHeatmap() {
         </div>
       )}
 
-      {/* 凡例 */}
       <div className="flex items-center gap-1.5 text-xs text-gray-400 select-none">
         <span>少</span>
         {(["bg-gray-100","bg-indigo-200","bg-indigo-400","bg-indigo-600","bg-indigo-800"] as const).map(

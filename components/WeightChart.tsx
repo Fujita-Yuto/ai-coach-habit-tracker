@@ -11,47 +11,67 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { getWeights, saveWeights, type WeightEntry } from "@/lib/storage";
+import { dbGetWeights, dbUpsertWeight, dbDeleteWeight } from "@/lib/db";
+import { useAuth } from "./AuthProvider";
 
 function todayStr(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
 export default function WeightChart() {
+  const { user } = useAuth();
   const [weights, setWeights] = useState<WeightEntry[]>([]);
   const [date, setDate] = useState(todayStr());
   const [kg, setKg] = useState("");
 
   useEffect(() => {
-    startTransition(() => {
-      setWeights(getWeights());
-    });
-  }, []);
+    async function load() {
+      if (user) {
+        const data = await dbGetWeights(user.id);
+        startTransition(() => setWeights(data));
+      } else {
+        startTransition(() => setWeights(getWeights()));
+      }
+    }
+    load();
+  }, [user]);
 
-  function addWeight(e: React.FormEvent) {
+  async function addWeight(e: React.FormEvent) {
     e.preventDefault();
     const weightKg = parseFloat(kg);
     if (!date || isNaN(weightKg) || weightKg <= 0) return;
+    const entry: WeightEntry = { date, weightKg };
 
-    // 同日は上書き
-    const updated = [
-      ...weights.filter((w) => w.date !== date),
-      { date, weightKg },
-    ].sort((a, b) => a.date.localeCompare(b.date));
-
-    saveWeights(updated);
-    setWeights(updated);
+    if (user) {
+      await dbUpsertWeight(user.id, entry);
+      setWeights((prev) =>
+        [...prev.filter((w) => w.date !== date), entry].sort((a, b) =>
+          a.date.localeCompare(b.date)
+        )
+      );
+    } else {
+      const updated = [...weights.filter((w) => w.date !== date), entry].sort(
+        (a, b) => a.date.localeCompare(b.date)
+      );
+      saveWeights(updated);
+      setWeights(updated);
+    }
     setKg("");
   }
 
-  function removeWeight(targetDate: string) {
-    const updated = weights.filter((w) => w.date !== targetDate);
-    saveWeights(updated);
-    setWeights(updated);
+  async function removeWeight(targetDate: string) {
+    if (user) {
+      await dbDeleteWeight(user.id, targetDate);
+      setWeights((prev) => prev.filter((w) => w.date !== targetDate));
+    } else {
+      const updated = weights.filter((w) => w.date !== targetDate);
+      saveWeights(updated);
+      setWeights(updated);
+    }
   }
 
-  // 直近30件をグラフ用データに変換
   const chartData = weights.slice(-30).map((w) => ({
-    date: w.date.slice(5), // "MM-DD" 表示
+    date: w.date.slice(5),
     体重: w.weightKg,
   }));
 

@@ -11,24 +11,48 @@ import {
   type Habit,
   type HabitLog,
 } from "@/lib/storage";
+import {
+  dbGetHabits,
+  dbAddHabit,
+  dbDeleteHabit,
+  dbGetLogs,
+  dbToggleLog,
+} from "@/lib/db";
+import { useAuth } from "./AuthProvider";
 
 function todayStr(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
 export default function HabitList() {
+  const { user } = useAuth();
   const [habits, setHabits] = useState<Habit[]>([]);
   const [logs, setLogs] = useState<HabitLog[]>([]);
   const [newName, setNewName] = useState("");
 
+  // user が変わるたびに再ロード（ログイン・ログアウト時も含む）
   useEffect(() => {
-    startTransition(() => {
-      setHabits(getHabits());
-      setLogs(getLogs());
-    });
-  }, []);
+    async function load() {
+      if (user) {
+        const [h, l] = await Promise.all([
+          dbGetHabits(user.id),
+          dbGetLogs(user.id),
+        ]);
+        startTransition(() => {
+          setHabits(h);
+          setLogs(l);
+        });
+      } else {
+        startTransition(() => {
+          setHabits(getHabits());
+          setLogs(getLogs());
+        });
+      }
+    }
+    load();
+  }, [user]);
 
-  function addHabit(e: React.FormEvent) {
+  async function addHabit(e: React.FormEvent) {
     e.preventDefault();
     const name = newName.trim();
     if (!name) return;
@@ -37,21 +61,48 @@ export default function HabitList() {
       name,
       createdAt: todayStr(),
     };
-    const updated = [...habits, habit];
-    saveHabits(updated);
-    setHabits(updated);
+    if (user) {
+      await dbAddHabit(user.id, habit);
+      setHabits((prev) => [...prev, habit]);
+    } else {
+      const updated = [...habits, habit];
+      saveHabits(updated);
+      setHabits(updated);
+    }
     setNewName("");
   }
 
-  function removeHabit(id: string) {
-    const updated = habits.filter((h) => h.id !== id);
-    saveHabits(updated);
-    setHabits(updated);
+  async function removeHabit(id: string) {
+    if (user) {
+      await dbDeleteHabit(id);
+      setHabits((prev) => prev.filter((h) => h.id !== id));
+      setLogs((prev) => prev.filter((l) => l.habitId !== id));
+    } else {
+      const updated = habits.filter((h) => h.id !== id);
+      saveHabits(updated);
+      setHabits(updated);
+    }
   }
 
-  function handleToggle(habitId: string) {
-    toggleLog(habitId, todayStr());
-    setLogs(getLogs());
+  async function handleToggle(habitId: string) {
+    const date = todayStr();
+    if (user) {
+      const newDone = await dbToggleLog(user.id, habitId, date);
+      setLogs((prev) => {
+        const idx = prev.findIndex(
+          (l) => l.habitId === habitId && l.date === date
+        );
+        if (idx >= 0) {
+          const next = [...prev];
+          next[idx] = { ...next[idx], done: newDone };
+          return next;
+        }
+        return [...prev, { habitId, date, done: newDone }];
+      });
+    } else {
+      toggleLog(habitId, date);
+      setLogs(getLogs());
+    }
   }
 
   const weeklyRate = calcWeeklyRate(habits, logs);
