@@ -30,7 +30,6 @@ export default function HabitList() {
   const [logs, setLogs] = useState<HabitLog[]>([]);
   const [newName, setNewName] = useState("");
 
-  // user が変わるたびに再ロード（ログイン・ログアウト時も含む）
   useEffect(() => {
     async function load() {
       if (user) {
@@ -112,15 +111,19 @@ export default function HabitList() {
     <div className="space-y-4">
       {/* 7日達成率サマリ */}
       {habits.length > 0 && (
-        <div className="flex items-center gap-2 rounded-lg bg-indigo-50 px-4 py-2 text-sm">
-          <span className="text-gray-600">直近7日の達成率</span>
-          <span className="ml-auto font-bold text-indigo-600 text-lg">{weeklyRate}%</span>
+        <div className="flex items-center gap-2 rounded-lg bg-indigo-50 px-4 py-2 text-sm dark:bg-indigo-950">
+          <span className="text-gray-600 dark:text-indigo-300">直近7日の達成率</span>
+          <span className="ml-auto text-lg font-bold text-indigo-600 dark:text-indigo-400">
+            {weeklyRate}%
+          </span>
         </div>
       )}
 
       {/* 習慣リスト */}
       {habits.length === 0 ? (
-        <p className="text-sm text-gray-400">習慣がまだありません。下のフォームから追加してください。</p>
+        <p className="text-sm text-gray-400">
+          習慣がまだありません。下のフォームから追加してください。
+        </p>
       ) : (
         <ul className="space-y-2">
           {habits.map((habit) => {
@@ -131,7 +134,7 @@ export default function HabitList() {
             return (
               <li
                 key={habit.id}
-                className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm"
+                className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm dark:border-gray-700 dark:bg-gray-800"
               >
                 <input
                   type="checkbox"
@@ -141,7 +144,9 @@ export default function HabitList() {
                 />
                 <span
                   className={`flex-1 text-sm font-medium ${
-                    isDone ? "text-gray-400 line-through" : "text-gray-800"
+                    isDone
+                      ? "text-gray-400 line-through dark:text-gray-600"
+                      : "text-gray-800 dark:text-gray-200"
                   }`}
                 >
                   {habit.name}
@@ -153,7 +158,7 @@ export default function HabitList() {
                 )}
                 <button
                   onClick={() => removeHabit(habit.id)}
-                  className="shrink-0 text-gray-300 transition-colors hover:text-red-400"
+                  className="shrink-0 text-gray-300 transition-colors hover:text-red-400 dark:text-gray-600 dark:hover:text-red-500"
                   aria-label={`${habit.name}を削除`}
                 >
                   ✕
@@ -171,11 +176,11 @@ export default function HabitList() {
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder="習慣名を入力（例：朝30分ウォーキング）"
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
+          className="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:placeholder-gray-500"
         />
         <button
           type="submit"
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+          className="shrink-0 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
         >
           追加
         </button>

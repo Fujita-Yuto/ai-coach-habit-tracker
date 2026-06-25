@@ -69,11 +69,11 @@ function buildGrid(countMap: Record<string, number>) {
 }
 
 function cellBg(count: number, isFuture: boolean): string {
-  if (isFuture || count === 0) return "bg-gray-100";
-  if (count === 1) return "bg-indigo-200";
-  if (count <= 3) return "bg-indigo-400";
-  if (count <= 5) return "bg-indigo-600";
-  return "bg-indigo-800";
+  if (isFuture || count === 0) return "bg-gray-100 dark:bg-gray-700";
+  if (count === 1) return "bg-indigo-200 dark:bg-indigo-800";
+  if (count <= 3) return "bg-indigo-400 dark:bg-indigo-600";
+  if (count <= 5) return "bg-indigo-600 dark:bg-indigo-400";
+  return "bg-indigo-800 dark:bg-indigo-300";
 }
 
 export default function HabitHeatmap() {
@@ -112,18 +112,18 @@ export default function HabitHeatmap() {
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-gray-500 dark:text-gray-400">
         過去1年間の達成合計：
-        <span className="font-semibold text-indigo-600">{totalDone} 件</span>
+        <span className="font-semibold text-indigo-600 dark:text-indigo-400">{totalDone} 件</span>
       </p>
 
       <div className="overflow-x-auto pb-1">
         <div className="relative" style={{ width: `${gridWidth}px` }}>
-          <div className="relative h-5 ml-6">
+          <div className="relative ml-6 h-5">
             {monthMarkers.map(({ col, label }) => (
               <span
                 key={`${col}-${label}`}
-                className="absolute text-[11px] leading-none text-gray-500 select-none"
+                className="absolute select-none text-[11px] leading-none text-gray-500 dark:text-gray-400"
                 style={{ left: `${col * COL_W}px` }}
               >
                 {label}
@@ -132,11 +132,11 @@ export default function HabitHeatmap() {
           </div>
 
           <div className="flex gap-0.5">
-            <div className="flex flex-col gap-0.5 w-6 shrink-0">
+            <div className="flex w-6 shrink-0 flex-col gap-0.5">
               {DOW_LABELS.map((label, i) => (
                 <div
                   key={i}
-                  className="h-3 text-[10px] leading-3 text-gray-400 flex items-center justify-end pr-1 select-none"
+                  className="flex h-3 select-none items-center justify-end pr-1 text-[10px] leading-3 text-gray-400 dark:text-gray-500"
                 >
                   {label}
                 </div>
@@ -148,7 +148,7 @@ export default function HabitHeatmap() {
                 {week.map((cell, di) => (
                   <div
                     key={di}
-                    className={`w-3 h-3 rounded-sm ${cellBg(cell.count, cell.isFuture)} transition-opacity hover:opacity-70 cursor-default`}
+                    className={`h-3 w-3 cursor-default rounded-sm transition-opacity hover:opacity-70 ${cellBg(cell.count, cell.isFuture)}`}
                     onMouseEnter={(e) => {
                       if (cell.isFuture) return;
                       const rect = e.currentTarget.getBoundingClientRect();
@@ -180,11 +180,11 @@ export default function HabitHeatmap() {
         </div>
       )}
 
-      <div className="flex items-center gap-1.5 text-xs text-gray-400 select-none">
+      <div className="flex select-none items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
         <span>少</span>
-        {(["bg-gray-100","bg-indigo-200","bg-indigo-400","bg-indigo-600","bg-indigo-800"] as const).map(
+        {(["bg-gray-100 dark:bg-gray-700","bg-indigo-200 dark:bg-indigo-800","bg-indigo-400 dark:bg-indigo-600","bg-indigo-600 dark:bg-indigo-400","bg-indigo-800 dark:bg-indigo-300"] as const).map(
           (cls) => (
-            <div key={cls} className={`w-3 h-3 rounded-sm ${cls}`} />
+            <div key={cls} className={`h-3 w-3 rounded-sm ${cls}`} />
           )
         )}
         <span>多</span>

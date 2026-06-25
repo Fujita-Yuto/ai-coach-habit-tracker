@@ -16,10 +16,12 @@ export default function AuthButton() {
   if (user) {
     return (
       <div className="flex items-center gap-3 text-sm">
-        <span className="text-gray-500 truncate max-w-[180px]">{user.email}</span>
+        <span className="max-w-[140px] truncate text-gray-500 dark:text-gray-400">
+          {user.email}
+        </span>
         <button
           onClick={() => getSupabase()?.auth.signOut()}
-          className="shrink-0 rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100"
+          className="shrink-0 rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
         >
           ログアウト
         </button>
@@ -30,8 +32,8 @@ export default function AuthButton() {
   // ── マジックリンク送信済み ───────────────────────────────
   if (sent) {
     return (
-      <p className="text-sm text-green-600">
-        {email} にログインリンクを送りました。メールを確認してください。
+      <p className="text-sm text-green-600 dark:text-green-400">
+        {email} にログインリンクを送りました。
       </p>
     );
   }
@@ -40,7 +42,9 @@ export default function AuthButton() {
   if (!open) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-400">ゲストモード（localStorage保存）</span>
+        <span className="hidden text-xs text-gray-400 sm:inline">
+          ゲストモード（localStorage保存）
+        </span>
         <button
           onClick={() => setOpen(true)}
           className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-indigo-700"
@@ -76,7 +80,7 @@ export default function AuthButton() {
         onChange={(e) => setEmail(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleMagicLink()}
         placeholder="メールアドレス"
-        className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-400 focus:outline-none"
+        className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-400 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:placeholder-gray-500"
       />
       <button
         onClick={handleMagicLink}
@@ -86,13 +90,13 @@ export default function AuthButton() {
       </button>
       <button
         onClick={handleGoogle}
-        className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
       >
         Googleでログイン
       </button>
       <button
         onClick={() => setOpen(false)}
-        className="text-xs text-gray-400 hover:text-gray-600"
+        className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
       >
         キャンセル
       </button>

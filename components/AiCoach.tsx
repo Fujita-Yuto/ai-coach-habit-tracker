@@ -18,25 +18,25 @@ const CARDS: {
     key: "praise",
     label: "励まし",
     icon: "🌟",
-    bg: "bg-indigo-50",
-    border: "border-indigo-200",
-    heading: "text-indigo-700",
+    bg: "bg-indigo-50 dark:bg-indigo-950",
+    border: "border-indigo-200 dark:border-indigo-800",
+    heading: "text-indigo-700 dark:text-indigo-400",
   },
   {
     key: "insight",
     label: "傾向・気づき",
     icon: "📊",
-    bg: "bg-blue-50",
-    border: "border-blue-200",
-    heading: "text-blue-700",
+    bg: "bg-blue-50 dark:bg-blue-950",
+    border: "border-blue-200 dark:border-blue-800",
+    heading: "text-blue-700 dark:text-blue-400",
   },
   {
     key: "action",
     label: "今日のアクション",
     icon: "🎯",
-    bg: "bg-emerald-50",
-    border: "border-emerald-200",
-    heading: "text-emerald-700",
+    bg: "bg-emerald-50 dark:bg-emerald-950",
+    border: "border-emerald-200 dark:border-emerald-800",
+    heading: "text-emerald-700 dark:text-emerald-400",
   },
 ];
 
@@ -96,33 +96,30 @@ export default function AiCoach() {
         {loading ? "考え中…" : "AIコーチに相談する"}
       </button>
 
-      {/* ローディング */}
       {loading && (
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
           <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-indigo-400 border-t-transparent" />
           AIコーチが分析しています…
         </div>
       )}
 
-      {/* エラー */}
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
           {error}
         </div>
       )}
 
-      {/* 3カード */}
       {result && (
         <div className="grid gap-3 sm:grid-cols-3">
           {CARDS.map(({ key, label, icon, bg, border, heading }) => (
             <div
               key={key}
-              className={`rounded-xl border ${border} ${bg} px-4 py-3 space-y-1`}
+              className={`space-y-1 rounded-xl border ${border} ${bg} px-4 py-3`}
             >
               <p className={`text-xs font-semibold uppercase tracking-wide ${heading}`}>
                 {icon} {label}
               </p>
-              <p className="text-sm text-gray-800 leading-relaxed">
+              <p className="text-sm leading-relaxed text-gray-800 dark:text-gray-200">
                 {result[key]}
               </p>
             </div>
