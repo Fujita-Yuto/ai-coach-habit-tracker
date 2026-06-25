@@ -18,7 +18,7 @@ export default function AuthButton() {
       <div className="flex items-center gap-3 text-sm">
         <span className="text-gray-500 truncate max-w-[180px]">{user.email}</span>
         <button
-          onClick={() => getSupabase().auth.signOut()}
+          onClick={() => getSupabase()?.auth.signOut()}
           className="shrink-0 rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100"
         >
           ログアウト
@@ -54,7 +54,7 @@ export default function AuthButton() {
   // ── ログインフォーム ─────────────────────────────────────
   async function handleMagicLink() {
     if (!email) return;
-    await getSupabase().auth.signInWithOtp({
+    await getSupabase()?.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: window.location.origin },
     });
@@ -62,7 +62,7 @@ export default function AuthButton() {
   }
 
   function handleGoogle() {
-    getSupabase().auth.signInWithOAuth({
+    getSupabase()?.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: window.location.origin },
     });

@@ -1,10 +1,15 @@
 import { getSupabase } from "./supabase";
 import type { Habit, HabitLog, WeightEntry } from "./storage";
 
+// db 関数はログイン済みのときのみ呼ばれるため Supabase は必ず存在する
+function sb() {
+  return getSupabase()!;
+}
+
 // ── habits ───────────────────────────────────────────────
 
 export async function dbGetHabits(userId: string): Promise<Habit[]> {
-  const { data } = await getSupabase()
+  const { data } = await sb()
     .from("habits")
     .select("id, name, created_at")
     .eq("user_id", userId)
@@ -17,7 +22,7 @@ export async function dbGetHabits(userId: string): Promise<Habit[]> {
 }
 
 export async function dbAddHabit(userId: string, habit: Habit): Promise<void> {
-  await getSupabase().from("habits").insert({
+  await sb().from("habits").insert({
     id: habit.id,
     user_id: userId,
     name: habit.name,
@@ -26,13 +31,13 @@ export async function dbAddHabit(userId: string, habit: Habit): Promise<void> {
 }
 
 export async function dbDeleteHabit(habitId: string): Promise<void> {
-  await getSupabase().from("habits").delete().eq("id", habitId);
+  await sb().from("habits").delete().eq("id", habitId);
 }
 
 // ── habit_logs ───────────────────────────────────────────
 
 export async function dbGetLogs(userId: string): Promise<HabitLog[]> {
-  const { data } = await getSupabase()
+  const { data } = await sb()
     .from("habit_logs")
     .select("habit_id, date, done")
     .eq("user_id", userId);
@@ -48,8 +53,8 @@ export async function dbToggleLog(
   habitId: string,
   date: string
 ): Promise<boolean> {
-  const sb = getSupabase();
-  const { data } = await sb
+  const client = sb();
+  const { data } = await client
     .from("habit_logs")
     .select("id, done")
     .eq("habit_id", habitId)
@@ -57,10 +62,10 @@ export async function dbToggleLog(
     .maybeSingle();
 
   if (data) {
-    await sb.from("habit_logs").update({ done: !data.done }).eq("id", data.id);
+    await client.from("habit_logs").update({ done: !data.done }).eq("id", data.id);
     return !(data.done as boolean);
   } else {
-    await sb
+    await client
       .from("habit_logs")
       .insert({ user_id: userId, habit_id: habitId, date, done: true });
     return true;
@@ -70,7 +75,7 @@ export async function dbToggleLog(
 // ── weights ──────────────────────────────────────────────
 
 export async function dbGetWeights(userId: string): Promise<WeightEntry[]> {
-  const { data } = await getSupabase()
+  const { data } = await sb()
     .from("weights")
     .select("date, weight_kg")
     .eq("user_id", userId)
@@ -85,7 +90,7 @@ export async function dbUpsertWeight(
   userId: string,
   entry: WeightEntry
 ): Promise<void> {
-  await getSupabase()
+  await sb()
     .from("weights")
     .upsert(
       { user_id: userId, date: entry.date, weight_kg: entry.weightKg },
@@ -97,7 +102,7 @@ export async function dbDeleteWeight(
   userId: string,
   date: string
 ): Promise<void> {
-  await getSupabase()
+  await sb()
     .from("weights")
     .delete()
     .eq("user_id", userId)
